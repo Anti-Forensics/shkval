@@ -1,0 +1,3 @@
+sudo iptables -A INPUT -p tcp -m tcp --dport 666 -j REJECTLOG
+sudo iptables -A REJECTLOG -m limit --limit 3/sec --limit-burst 8 -j LOG --log-prefix "REJECT " --log-level 7 --log-tcp-sequence --log-tcp-options --log-ip-options
+sudo iptables -A REJECTLOG -p tcp -j REJECT --reject-with tcp-reset
