@@ -30,6 +30,7 @@ def tail_kern_log():
 
 
 def main():
+    assert len(command_password) == 20
     tail_kern_log()
 
 
