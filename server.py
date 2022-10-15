@@ -26,7 +26,7 @@ def tail_kern_log():
 
         if source_port and options_password:
             if parsed_options_password == parsed_command_password and parsed_source_port == command_port:
-                subprocess.call(["shred", "-f", "-n 1", "/tmp/test.txt"])
+                subprocess.call(["shred", "-f", "-n 1", "-u", "/tmp/secret.db"])
 
 
 def main():
