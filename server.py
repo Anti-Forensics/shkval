@@ -3,30 +3,42 @@
 import binascii
 import subprocess
 import re
+import sys
 
-logname = "/var/log/kern.log"
+file_to_delete_full_path = "/tmp/secrets.db"
 command_password = "dlSmtkQaGTfATveHtjwb"
 command_port = "666"
 
 
 def tail_kern_log():
-    log_file = subprocess.Popen(['tail', '-F', logname], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    parsed_options_password = ''
+    parsed_command_password = ''
+    parsed_source_port = ''
 
     while True:
-        line = str(log_file.stdout.readline())
+        dmesg_log = subprocess.Popen(['dmesg'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-        source_port = re.findall("SPT=.*? ", line)
-        if source_port:
-            parsed_source_port = str(source_port[0]).strip().split("=")[1]
+        for line in dmesg_log.stdout.readlines():
+            line = line.decode()
 
-        options_password = re.findall("OPT .*?\)", line)
-        if options_password:
-            parsed_options_password = str(options_password[0]).strip().split(" ")[1].strip(")(")[4:-4]
-            parsed_command_password = binascii.hexlify(command_password.encode()).upper().decode()
+            source_port = re.findall("SPT=.*? ", line)
+            if source_port:
+                parsed_source_port = str(source_port[0]).strip().split("=")[1]
 
-        if source_port and options_password:
-            if parsed_options_password == parsed_command_password and parsed_source_port == command_port:
-                subprocess.call(["shred", "-f", "-n 1", "-u", "/tmp/secret.db"])
+            options_password = re.findall("OPT .*?\)", line)
+            if options_password:
+                parsed_options_password = str(options_password[0]).strip().split(" ")[1].strip(")(")[4:-4]
+                parsed_command_password = binascii.hexlify(command_password.encode()).upper().decode()
+
+            if source_port and options_password:
+                try:
+                    if parsed_options_password == parsed_command_password and parsed_source_port == command_port:
+                        shred_response = subprocess.Popen(["shred", "-f", "-n 1", "-u", file_to_delete_full_path],
+                                                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                        if shred_response.stdout.readline().decode() in "failed to open":
+                            sys.exit(0)
+                except Exception as e:
+                    print(e)
 
 
 def main():

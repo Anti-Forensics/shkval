@@ -1,3 +1,3 @@
-sudo iptables -N SHKVAL
-sudo iptables -A INPUT -p tcp -m tcp --dport 666 -j SHKVAL
-sudo iptables -A SHKVAL -j LOG --log-prefix "SHKVAL " --log-tcp-options
+sudo nft add table ip shkval
+sudo nft add chain ip shkval input { type filter hook input priority 0\; }
+sudo nft add rule shkval input log level debug log flags all
